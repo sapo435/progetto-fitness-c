@@ -20,13 +20,15 @@ sqlite3* inizializza_database(const char* db_path) {
 void crea_tabelle(sqlite3* db) {
     const char* sql =
         "CREATE TABLE IF NOT EXISTS UTENTI (ID INTEGER PRIMARY KEY AUTOINCREMENT, NOME TEXT, COGNOME TEXT, RUOLO TEXT, ETA INTEGER, SESSO TEXT, PESO REAL, ALTEZZA REAL, BMR REAL, TDEE REAL);"
+        "CREATE TABLE IF NOT EXISTS CREDENZIALI (ID_UTENTE INTEGER PRIMARY KEY, USERNAME TEXT UNIQUE NOT NULL, PASSWORD TEXT NOT NULL, FOREIGN KEY(ID_UTENTE) REFERENCES UTENTI(ID) ON DELETE CASCADE);"
         "CREATE TABLE IF NOT EXISTS ESERCIZI (ID INTEGER PRIMARY KEY AUTOINCREMENT, NOME TEXT, GRUPPO_MUSCOLARE TEXT, DESCRIZIONE TEXT);"
         "CREATE TABLE IF NOT EXISTS ALIMENTI (ID INTEGER PRIMARY KEY AUTOINCREMENT, NOME TEXT, KCAL REAL, PROTEINE REAL, CARBOIDRATI REAL, GRASSI REAL);"
         "CREATE TABLE IF NOT EXISTS SCHEDE_ALLENAMENTO (ID INTEGER PRIMARY KEY AUTOINCREMENT, TITOLO TEXT, ID_CLIENTE INTEGER, FOREIGN KEY(ID_CLIENTE) REFERENCES UTENTI(ID));"
         "CREATE TABLE IF NOT EXISTS DETTAGLI_SCHEDA (ID_SCHEDA INTEGER, ID_ESERCIZIO INTEGER, SERIE INTEGER, RIPETIZIONI INTEGER, RECUPERO_SEC INTEGER, FOREIGN KEY(ID_SCHEDA) REFERENCES SCHEDE_ALLENAMENTO(ID), FOREIGN KEY(ID_ESERCIZIO) REFERENCES ESERCIZI(ID));"
         "CREATE TABLE IF NOT EXISTS STORICO (ID INTEGER PRIMARY KEY AUTOINCREMENT, ID_CLIENTE INTEGER, DATA TEXT, PESO_REGISTRATO REAL, FOREIGN KEY(ID_CLIENTE) REFERENCES UTENTI(ID));"
         "CREATE TABLE IF NOT EXISTS PIANI_ALIMENTARI (ID INTEGER PRIMARY KEY AUTOINCREMENT, ID_CLIENTE INTEGER, KCAL_TARGET REAL, NOTE_DIETA TEXT, FOREIGN KEY(ID_CLIENTE) REFERENCES UTENTI(ID));";
-        esegui_query(db, sql);
+        
+    esegui_query(db, sql);
 }
 
 int inserisci_utente_db(sqlite3* db, const char* nome, const char* cognome, const char* ruolo, int eta, const char* sesso, float peso, float altezza, float bmr, float tdee) {
@@ -116,4 +118,29 @@ int inserisci_piani_alimentari(sqlite3* db, int id_cliente , float kcal_target ,
 
 
 }
+int inserisci_credenziali(sqlite3* db,int id_utente,  const char* username , const char* password) {
+    const char* sql = "INSERT INTO CREDENZIALI (ID_UTENTE, USERNAME, PASSWORD) VALUES (?, ?, ?);";
+    sqlite3_stmt* stmt;
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK) return 0;
+    sqlite3_bind_int(stmt, 1, id_utente);
+    sqlite3_bind_text(stmt, 2, username, -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 3,password , -1, SQLITE_TRANSIENT);
+    int rc = sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+    return (rc == SQLITE_DONE);
+}
+int verifica_login(sqlite3 *db, const char* username, const char* password) {
+    const char* sql = "SELECT ID_UTENTE FROM CREDENZIALI WHERE USERNAME = ? AND PASSWORD = ?;";
+    sqlite3_stmt* stmt;
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK) return 0;
+    sqlite3_bind_text(stmt, 1, username, -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 2,password , -1, SQLITE_TRANSIENT);
+    int id_utente = -1;
+    if (sqlite3_step(stmt) == SQLITE_ROW) {
+        id_utente = sqlite3_column_int(stmt, 0);
+    }
+    sqlite3_finalize(stmt);
+    return id_utente;
+}
+
 void chiudi_database(sqlite3* db) { if (db) sqlite3_close(db); }

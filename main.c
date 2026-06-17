@@ -18,9 +18,8 @@ int main() {
     // Scegliamo la porta 8080 come standard
     avvia_server(db, 8080);
 
-    // Questa riga verrà eseguita SOLO se il server si spegne
+    // Questa riga verrà eseguita SOLO se il server si spegne3
     chiudi_database(db);
     printf("Sistema spento correttamente.\n");
-
     return 0;
 }

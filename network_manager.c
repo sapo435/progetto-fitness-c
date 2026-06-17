@@ -250,7 +250,33 @@ void gestisci_client(SOCKET client_socket, sqlite3 *db) {
         get_dettagli_scheda(db, id_scheda, output, sizeof(output));
         send(client_socket, output, strlen(output), 0);
 
-    } else {
+    } else if (strcmp(comando, "REGISTRA") ==0) {
+        char *id_tok      = strtok(NULL, "|");
+        int   id_utente   = atoi(id_tok);
+        char *username     = strtok(NULL, "|");
+        char *password    = strtok(NULL, "|");
+        int ris = inserisci_credenziali( db, id_utente, username, password) ;
+        if (ris)
+            send(client_socket, "OK", strlen("OK"), 0);
+        else
+            send(client_socket, "ERRORE", strlen("ERRORE"), 0);
+
+    }  else if (strcmp(comando, "LOGIN") ==0) {
+        char *username     = strtok(NULL, "|");
+        char *password    = strtok(NULL, "|");
+        int ris = verifica_login( db, username, password) ;
+        if (ris != -1) {
+            char ruolo[32];
+            get_ruolo_utente(db, ris, ruolo, sizeof(ruolo));
+            char risposta[64];
+            snprintf(risposta, sizeof(risposta), "%d|%s", ris, ruolo);
+            send(client_socket, risposta, strlen(risposta), 0);
+        } else {
+            send(client_socket, "ERRORE", strlen("ERRORE"), 0);
+        }
+
+    }
+    else {
         send(client_socket, "COMANDO_SCONOSCIUTO", strlen("COMANDO_SCONOSCIUTO"), 0);
     }
 
@@ -395,4 +421,18 @@ void get_piani_alimentari(sqlite3 *db, int id_cliente, char *output, int output_
         strncat(output, riga, output_size - strlen(output) - 1);
     }
     sqlite3_finalize(stmt);
+}
+
+void get_ruolo_utente(sqlite3 *db, int id_utente, char *output, int output_size) {
+    output[0] = '\0';
+    const char *sql = "SELECT RUOLO FROM UTENTI WHERE ID = ?;";
+    sqlite3_stmt *stmt;
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK) return;
+    sqlite3_bind_int(stmt, 1, id_utente);
+    if (sqlite3_step(stmt) == SQLITE_ROW) {
+        const char *ruolo = sqlite3_column_text(stmt, 0);
+        snprintf(output, output_size, "%s", ruolo);
+    }
+    sqlite3_finalize(stmt);
+
 }
