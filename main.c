@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <time.h>
+
 #include "db_manager.h"
 #include "network_manager.h" // 1. AGGIUNGI QUESTO INCUDE!
 
@@ -16,6 +18,7 @@ int main() {
 
     // 2. AVVIA IL SERVER (Sostituisce il vecchio commento)
     // Scegliamo la porta 8080 come standard
+    srand(time(NULL));
     avvia_server(db, 8080);
 
     // Questa riga verrà eseguita SOLO se il server si spegne3

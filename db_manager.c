@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include "db_manager.h"
 
 static void esegui_query(sqlite3 *db, const char *sql) {
@@ -26,8 +27,9 @@ void crea_tabelle(sqlite3* db) {
         "CREATE TABLE IF NOT EXISTS SCHEDE_ALLENAMENTO (ID INTEGER PRIMARY KEY AUTOINCREMENT, TITOLO TEXT, ID_CLIENTE INTEGER, FOREIGN KEY(ID_CLIENTE) REFERENCES UTENTI(ID));"
         "CREATE TABLE IF NOT EXISTS DETTAGLI_SCHEDA (ID_SCHEDA INTEGER, ID_ESERCIZIO INTEGER, SERIE INTEGER, RIPETIZIONI INTEGER, RECUPERO_SEC INTEGER, FOREIGN KEY(ID_SCHEDA) REFERENCES SCHEDE_ALLENAMENTO(ID), FOREIGN KEY(ID_ESERCIZIO) REFERENCES ESERCIZI(ID));"
         "CREATE TABLE IF NOT EXISTS STORICO (ID INTEGER PRIMARY KEY AUTOINCREMENT, ID_CLIENTE INTEGER, DATA TEXT, PESO_REGISTRATO REAL, FOREIGN KEY(ID_CLIENTE) REFERENCES UTENTI(ID));"
-        "CREATE TABLE IF NOT EXISTS PIANI_ALIMENTARI (ID INTEGER PRIMARY KEY AUTOINCREMENT, ID_CLIENTE INTEGER, KCAL_TARGET REAL, NOTE_DIETA TEXT, FOREIGN KEY(ID_CLIENTE) REFERENCES UTENTI(ID));";
-        
+        "CREATE TABLE IF NOT EXISTS PIANI_ALIMENTARI (ID INTEGER PRIMARY KEY AUTOINCREMENT, ID_CLIENTE INTEGER, KCAL_TARGET REAL, NOTE_DIETA TEXT, FOREIGN KEY(ID_CLIENTE) REFERENCES UTENTI(ID));"
+        "CREATE TABLE IF NOT EXISTS SESSIONI ( TOKEN TEXT PRIMARY KEY , ID_UTENTE INTEGER , SCADENZA INTEGER , FOREIGN KEY (ID_UTENTE) REFERENCES UTENTI(ID));";
+
     esegui_query(db, sql);
 }
 
@@ -129,10 +131,22 @@ int inserisci_credenziali(sqlite3* db,int id_utente,  const char* username , con
     sqlite3_finalize(stmt);
     return (rc == SQLITE_DONE);
 }
+int inserisci_sessione(sqlite3* db, const char* token, int id_cliente,long  scadenza) {
+    const char* sql ="INSERT INTO SESSIONI (TOKEN,ID_UTENTE,SCADENZA) VALUES (?, ?, ?);";
+    sqlite3_stmt* stmt;
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK) return 0;
+    sqlite3_bind_text(stmt, 1, token, -1, SQLITE_TRANSIENT);
+    sqlite3_bind_int(stmt, 2, id_cliente);
+    sqlite3_bind_int64(stmt, 3, scadenza);
+    int rc = sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+    return (rc == SQLITE_DONE);
+}
+
 int verifica_login(sqlite3 *db, const char* username, const char* password) {
     const char* sql = "SELECT ID_UTENTE FROM CREDENZIALI WHERE USERNAME = ? AND PASSWORD = ?;";
     sqlite3_stmt* stmt;
-    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK) return 0;
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK) return -1;
     sqlite3_bind_text(stmt, 1, username, -1, SQLITE_TRANSIENT);
     sqlite3_bind_text(stmt, 2,password , -1, SQLITE_TRANSIENT);
     int id_utente = -1;
@@ -141,6 +155,27 @@ int verifica_login(sqlite3 *db, const char* username, const char* password) {
     }
     sqlite3_finalize(stmt);
     return id_utente;
+}
+
+int valida_sessione(sqlite3* db, const char* token) {
+    const char* sql= "SELECT ID_UTENTE FROM SESSIONI WHERE TOKEN = ? AND SCADENZA > ? ";
+    sqlite3_stmt* stmt;
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK) return -1;
+    sqlite3_bind_text(stmt, 1, token, -1, SQLITE_TRANSIENT);
+    sqlite3_bind_int64(stmt, 2, (long)time(NULL));
+    int id_utente = -1;
+    if (sqlite3_step(stmt) == SQLITE_ROW) {
+        id_utente = sqlite3_column_int(stmt, 0);
+    }
+    sqlite3_finalize(stmt);
+    return id_utente;;
+}
+void genera_token(char* output, int output_size) {
+    const char charset[] = "abcdefghijklmnopqrstuvwxyz0123456789";
+    for (int i = 0; i < output_size-1; i++) {
+        output[i] = charset[rand() % (sizeof(charset) - 1)];
+    }
+    output[output_size-1] = '\0';
 }
 
 void chiudi_database(sqlite3* db) { if (db) sqlite3_close(db); }

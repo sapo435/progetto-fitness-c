@@ -8,7 +8,6 @@
 #endif
 
 void avvia_server(sqlite3 *db, int porta);
-
 void gestisci_client(SOCKET  client_socket, sqlite3 *db);
 
 #endif

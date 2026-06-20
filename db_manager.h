@@ -17,6 +17,7 @@ int inserisci_dettaglio_scheda(sqlite3* db, int id_scheda, int id_esercizio, int
 int inserisci_storico(sqlite3* db, int id_cliente, float peso, const char* data);
 int inserisci_piani_alimentari(sqlite3* db, int id_cliente, float kcal_target, const char* note);
 int inserisci_credenziali(sqlite3* db, int id_utente, const char* username, const char* password) ;
+int inserisci_sessione(sqlite3* db, const char* token, int id_cliente,long  scadenza);
 
 //GET
 // CRUD - Operazioni di Lettura
@@ -31,5 +32,7 @@ void get_ruolo_utente(sqlite3 *db, int id_utente, char *output, int output_size)
 
 
 int verifica_login(sqlite3 *db, const char* username, const char* password);
+int valida_sessione(sqlite3* db, const char* token);
+void genera_token(char* output, int output_size);
 
 #endif
