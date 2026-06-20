@@ -5,9 +5,9 @@ set(CMAKE_C_STANDARD 11)
 
 add_executable(New_Fitness
     main_logic.c
-    logica.c
-    interfaccia.c
-    server.c
+        client_logica.c
+        client_ui.c
+        client_api.c
     client_socket.c
 )
 
