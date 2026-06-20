@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <time.h>
-
+#include <stdlib.h>
 #include "db_manager.h"
-#include "network_manager.h" // 1. AGGIUNGI QUESTO INCUDE!
+#include "network_manager.h"
 
 int main() {
     // Inizializzazione del Database
@@ -16,12 +16,11 @@ int main() {
     crea_tabelle(db);
     printf("Database pronto e tabelle verificate.\n");
 
-    // 2. AVVIA IL SERVER (Sostituisce il vecchio commento)
+    //  AVVIO DEL SERVER
     // Scegliamo la porta 8080 come standard
     srand(time(NULL));
     avvia_server(db, 8080);
 
-    // Questa riga verrà eseguita SOLO se il server si spegne3
     chiudi_database(db);
     printf("Sistema spento correttamente.\n");
     return 0;

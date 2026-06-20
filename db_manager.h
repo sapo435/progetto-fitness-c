@@ -34,5 +34,6 @@ void get_ruolo_utente(sqlite3 *db, int id_utente, char *output, int output_size)
 int verifica_login(sqlite3 *db, const char* username, const char* password);
 int valida_sessione(sqlite3* db, const char* token);
 void genera_token(char* output, int output_size);
+int elimina_sessione(sqlite3* db, const char* token);
 
 #endif

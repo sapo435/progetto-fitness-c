@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #ifdef _WIN32
     #include <winsock2.h>
@@ -242,14 +243,23 @@ void gestisci_client(SOCKET client_socket, sqlite3 *db) {
         char *password = strtok(NULL, "|");
         int ris = verifica_login(db, username, password);
         if (ris != -1) {
+            char token[33];
+            genera_token(token,sizeof(token));
+            long scadenza = (long)time(NULL) + (8 * 60 * 60); // sessione valida 8 ore
+            inserisci_sessione(db, token, ris, scadenza);
             char ruolo[32];
             get_ruolo_utente(db, ris, ruolo, sizeof(ruolo));
-            char risposta[64];
-            snprintf(risposta, sizeof(risposta), "%d|%s", ris, ruolo);
+            char risposta[128];
+            snprintf(risposta, sizeof(risposta), "%s|%d|%s",token, ris, ruolo);
             send(client_socket, risposta, strlen(risposta), 0);
         } else {
             send(client_socket, "ERRORE", strlen("ERRORE"), 0);
         }
+
+    }else if (strcmp(comando, "LOGOUT") == 0) {
+        char* token = strtok(NULL, "|");
+        elimina_sessione(db, token);
+        send(client_socket, "OK", strlen("OK"), 0);
 
     } else {
         send(client_socket, "COMANDO_SCONOSCIUTO", strlen("COMANDO_SCONOSCIUTO"), 0);

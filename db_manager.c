@@ -177,5 +177,16 @@ void genera_token(char* output, int output_size) {
     }
     output[output_size-1] = '\0';
 }
+int elimina_sessione(sqlite3* db, const char* token) {
+    const char* sql = "DELETE FROM SESSIONI WHERE TOKEN = ?;";
+    sqlite3_stmt* stmt;
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK) return 0;
+    sqlite3_bind_text(stmt, 1, token, -1, SQLITE_TRANSIENT);
+    int rc = sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+    return (rc == SQLITE_DONE);
+}
 
-void chiudi_database(sqlite3* db) { if (db) sqlite3_close(db); }
+void chiudi_database(sqlite3* db) {
+    if (db) sqlite3_close(db);
+}
