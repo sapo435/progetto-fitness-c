@@ -1,17 +1,17 @@
 /*
- * interfaccia.c
- * -------------
+ * client_ui.c
+ * -----------
  * Input, output e flussi interattivi (area cliente e trainer).
- * La comunicazione col server e' in server.c.
+ * Ogni chiamata al server include il token di sessione.
  */
 
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
 #include <time.h>
-#include "interfaccia.h"
-#include "logica.h"
-#include "server.h"
+#include "client_ui.h"
+#include "client_logica.h"
+#include "client_api.h"
 
 /* ======================== INPUT ======================== */
 
@@ -160,7 +160,7 @@ void inserisci_dati(Utente *u)
 
 /* ======================== FEEDBACK SETTIMANALE ======================== */
 
-void sezione_feedback(Utente *u, int id_server)
+void sezione_feedback(Utente *u, int id_server, const char *token)
 {
     int sc;
     char data[16];
@@ -171,12 +171,11 @@ void sezione_feedback(Utente *u, int id_server)
     printf("  FEEDBACK — Settimana %d\n", u->settimana_corrente);
     linea('=', 62);
 
-    /* Aggiornamento peso */
     printf("\n  Aggiornare il peso? 1.Si 2.No\n");
     if (leggi_int("Scelta") == 1) {
         float np = leggi_float("Nuovo peso (kg)");
         registra_peso(u, np);
-        salva_storico_server(id_server, np, data);
+        salva_storico_server(token, id_server, np, data);
         printf("  -> Peso: %.1f kg | BMI: %.1f (%s)\n",
                u->peso_kg, u->bmi, categoria_bmi(u->bmi));
 
@@ -193,7 +192,6 @@ void sezione_feedback(Utente *u, int id_server)
         }
     }
 
-    /* Valutazione allenamento */
     printf("\n  Allenamento: 1.Facile 2.Giusto 3.Difficile 4.Non fatto\n");
     sc = leggi_int("Scelta");
     if (sc == 1) {
@@ -215,15 +213,13 @@ void sezione_feedback(Utente *u, int id_server)
         else printf("  -> Fissa un orario fisso per allenarti.\n");
     }
 
-    /* Valutazione dieta */
     printf("\n  Dieta: 1.Seguita 2.Parziale 3.Restrittiva 4.Abbondante\n");
     sc = leggi_int("Scelta");
     if (sc == 3) {
         u->kcal_obiettivo += 100.0f;
         calcola_macronutrienti(u->peso_kg, u->kcal_obiettivo, u->obiettivo,
                                &u->proteine_g, &u->grassi_g, &u->carboidrati_g);
-        printf("  -> Kcal +100 (ora %.0f). Meglio meno rigore e piu' costanza.\n",
-               u->kcal_obiettivo);
+        printf("  -> Kcal +100 (ora %.0f).\n", u->kcal_obiettivo);
     } else if (sc == 4) {
         u->kcal_obiettivo -= 50.0f;
         calcola_macronutrienti(u->peso_kg, u->kcal_obiettivo, u->obiettivo,
@@ -231,7 +227,6 @@ void sezione_feedback(Utente *u, int id_server)
         printf("  -> Kcal -50 (ora %.0f).\n", u->kcal_obiettivo);
     }
 
-    /* Obiettivo raggiunto? */
     if (fabsf(u->peso_kg - u->peso_obiettivo_kg) < 1.0f) {
         linea('*', 62);
         printf("  COMPLIMENTI! Peso obiettivo raggiunto!\n");
@@ -252,7 +247,7 @@ void sezione_feedback(Utente *u, int id_server)
 
 /* ======================== AREA TRAINER ======================== */
 
-void area_trainer(int id_trainer)
+void area_trainer(int id_trainer, const char *token)
 {
     int sc, id_cliente;
 
@@ -267,25 +262,25 @@ void area_trainer(int id_trainer)
 
         switch (sc) {
             case 1:
-                mostra_lista_utenti();
+                mostra_lista_utenti(token);
                 break;
             case 2:
                 id_cliente = leggi_int("ID cliente");
-                mostra_schede_server(id_cliente);
+                mostra_schede_server(token, id_cliente);
                 break;
             case 3:
                 id_cliente = leggi_int("ID cliente");
-                mostra_storico_server(id_cliente);
+                mostra_storico_server(token, id_cliente);
                 break;
             case 4:
                 id_cliente = leggi_int("ID cliente");
-                mostra_piani_server(id_cliente);
+                mostra_piani_server(token, id_cliente);
                 break;
             case 5: {
                 char titolo[DIM_NOME];
                 id_cliente = leggi_int("ID cliente");
                 leggi_stringa("Titolo scheda", titolo, DIM_NOME);
-                int id = salva_scheda_server(titolo, id_cliente);
+                int id = salva_scheda_server(token, titolo, id_cliente);
                 printf(id > 0 ? "  -> Scheda creata (ID: %d).\n"
                                : "  -> Errore.\n", id);
                 break;
@@ -295,7 +290,7 @@ void area_trainer(int id_trainer)
                 id_cliente = leggi_int("ID cliente");
                 kcal = leggi_float("Kcal target");
                 leggi_stringa("Note", note, DIM_TESTO);
-                printf(salva_piano_server(id_cliente, kcal, note)
+                printf(salva_piano_server(token, id_cliente, kcal, note)
                        ? "  -> Piano salvato.\n" : "  -> Errore.\n");
                 break;
             }

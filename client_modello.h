@@ -1,112 +1,80 @@
-#ifndef MODELLO_H
-#define MODELLO_H
+#ifndef CLIENT_MODELLO_H
+#define CLIENT_MODELLO_H
 
 /*
- * modello.h
- * ---------
+ * client_modello.h
+ * ----------------
  * Modello dati condiviso: costanti, enumerazioni e strutture.
- * Non contiene logica: solo definizioni di tipo.
  */
 
-/* ---- Costanti ---- */
 #define MAX_ESERCIZI  10
 #define MAX_SESSIONI  10
 #define MAX_PASTI      6
 #define MAX_STORICO   20
 #define DIM_NOME      64
 #define DIM_TESTO    256
+#define DIM_TOKEN    128
 
-/* ---- Enumerazioni ---- */
 typedef enum {
-    OBIETTIVO_DIMAGRIMENTO = 0,
-    OBIETTIVO_MASSA        = 1,
-    OBIETTIVO_MANTENIMENTO = 2,
-    OBIETTIVO_BENESSERE    = 3
+    OBIETTIVO_DIMAGRIMENTO = 0, OBIETTIVO_MASSA = 1,
+    OBIETTIVO_MANTENIMENTO = 2, OBIETTIVO_BENESSERE = 3
 } Obiettivo;
 
 typedef enum {
-    LIVELLO_PRINCIPIANTE = 0,
-    LIVELLO_INTERMEDIO   = 1,
-    LIVELLO_AVANZATO     = 2
+    LIVELLO_PRINCIPIANTE = 0, LIVELLO_INTERMEDIO = 1, LIVELLO_AVANZATO = 2
 } Livello;
 
 typedef enum {
-    SERVIZIO_SOLO_ALLENAMENTO = 0,
-    SERVIZIO_SOLO_NUTRIZIONE  = 1,
-    SERVIZIO_ENTRAMBI         = 2
+    SERVIZIO_SOLO_ALLENAMENTO = 0, SERVIZIO_SOLO_NUTRIZIONE = 1,
+    SERVIZIO_ENTRAMBI = 2
 } Servizio;
 
-/* ---- Strutture ---- */
-typedef struct {
-    float peso_kg;
-    int   settimana;
-} RegistrazionePeso;
+typedef struct { float peso_kg; int settimana; } RegistrazionePeso;
 
 typedef struct {
-    char      username[DIM_NOME];
-    char      nome[DIM_NOME];
-    char      cognome[DIM_NOME];
+    char username[DIM_NOME], nome[DIM_NOME], cognome[DIM_NOME];
     char      sesso;
     int       eta;
-    float     altezza_cm;
-    float     peso_kg;
-    float     peso_obiettivo_kg;
+    float     altezza_cm, peso_kg, peso_obiettivo_kg;
     Obiettivo obiettivo;
     Servizio  servizio;
-    float     livello_attivita;
-    float     bmi;
-    float     bmr;
-    float     tdee_kcal;
-    float     kcal_obiettivo;
-    float     proteine_g;
-    float     carboidrati_g;
-    float     grassi_g;
+    float     livello_attivita, bmi, bmr, tdee_kcal;
+    float     kcal_obiettivo, proteine_g, carboidrati_g, grassi_g;
     RegistrazionePeso storico_peso[MAX_STORICO];
-    int               num_pesi;
-    int               sessioni_completate;
-    int               settimana_corrente;
+    int       num_pesi, sessioni_completate, settimana_corrente;
 } Utente;
 
 typedef struct {
-    char nome_esercizio[DIM_NOME];
-    char gruppo_muscolare[DIM_NOME];
-    int  serie;
-    int  ripetizioni;
-    int  riposo_sec;
+    char nome_esercizio[DIM_NOME], gruppo_muscolare[DIM_NOME];
+    int  serie, ripetizioni, riposo_sec;
     char note[DIM_TESTO];
 } Esercizio;
 
 typedef struct {
-    char      titolo[DIM_NOME];
-    int       giorno_settimana;
+    char titolo[DIM_NOME];
+    int  giorno_settimana;
     Esercizio esercizi[MAX_ESERCIZI];
-    int       num_esercizi;
+    int num_esercizi;
 } Sessione;
 
 typedef struct {
-    char      nome[DIM_NOME];
-    char      descrizione[DIM_TESTO];
-    Obiettivo obiettivo;
-    Livello   livello;
-    int       durata_settimane;
-    Sessione  sessioni[MAX_SESSIONI];
-    int       num_sessioni;
+    char nome[DIM_NOME], descrizione[DIM_TESTO];
+    Obiettivo obiettivo; Livello livello;
+    int durata_settimane;
+    Sessione sessioni[MAX_SESSIONI];
+    int num_sessioni;
 } ProgrammaAllenamento;
 
 typedef struct {
-    char  nome[DIM_NOME];
-    char  alimenti[DIM_TESTO];
-    float kcal;
-    float proteine_g;
-    float carboidrati_g;
-    float grassi_g;
-    char  note[DIM_TESTO];
+    char nome[DIM_NOME], alimenti[DIM_TESTO];
+    float kcal, proteine_g, carboidrati_g, grassi_g;
+    char note[DIM_TESTO];
 } Pasto;
 
 typedef struct {
-    char  etichetta[DIM_NOME];
+    char etichetta[DIM_NOME];
     Pasto pasti[MAX_PASTI];
-    int   num_pasti;
+    int num_pasti;
 } PianoNutrizionale;
 
-#endif /* MODELLO_H */
+#endif

@@ -1,15 +1,13 @@
-#ifndef INTERFACCIA_H
-#define INTERFACCIA_H
+#ifndef CLIENT_UI_H
+#define CLIENT_UI_H
 
 /*
- * interfaccia.h
- * -------------
- * Input da tastiera, stampe a video e flussi interattivi
- * (area cliente e area trainer).
- * La comunicazione col server e' nel modulo server.h/server.c.
+ * client_ui.h
+ * -----------
+ * Input, stampe e flussi interattivi (area cliente e trainer).
  */
 
-#include "modello.h"
+#include "client_modello.h"
 
 /* ---- Input ---- */
 void  leggi_stringa(const char *etichetta, char *dest, int dim);
@@ -23,9 +21,9 @@ void        stampa_report(const Utente *u);
 void        stampa_programma(const ProgrammaAllenamento *p);
 void        stampa_piano(const PianoNutrizionale *piano);
 
-/* ---- Flussi interattivi ---- */
+/* ---- Flussi interattivi (richiedono il token di sessione) ---- */
 void inserisci_dati(Utente *u);
-void sezione_feedback(Utente *u, int id_server);
-void area_trainer(int id_trainer);
+void sezione_feedback(Utente *u, int id_server, const char *token);
+void area_trainer(int id_trainer, const char *token);
 
-#endif /* INTERFACCIA_H */
+#endif
