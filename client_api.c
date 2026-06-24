@@ -35,8 +35,13 @@ int login_server(const char *username, const char *password,
     if (!invia_comando(cmd, risposta, sizeof(risposta))) return -1;
     if (strncmp(risposta, "ERRORE", 6) == 0) return -1;
 
-    /* Parsa "id|ruolo|token" */
+    /* Parsa "token|id|ruolo" (ordine del server) */
     tok = strtok(risposta, "|");
+    if (!tok) return -1;
+    strncpy(token_out, tok, token_size - 1);
+    token_out[strcspn(token_out, "\r\n")] = '\0';
+
+    tok = strtok(NULL, "|");
     if (!tok) return -1;
     int id = atoi(tok);
 
@@ -44,14 +49,6 @@ int login_server(const char *username, const char *password,
     if (!tok) return -1;
     strncpy(ruolo_out, tok, ruolo_size - 1);
     ruolo_out[strcspn(ruolo_out, "\r\n")] = '\0';
-
-    tok = strtok(NULL, "|");
-    if (tok) {
-        strncpy(token_out, tok, token_size - 1);
-        token_out[strcspn(token_out, "\r\n")] = '\0';
-    } else {
-        token_out[0] = '\0';
-    }
 
     return id;
 }
