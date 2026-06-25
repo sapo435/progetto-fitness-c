@@ -35,13 +35,8 @@ int login_server(const char *username, const char *password,
     if (!invia_comando(cmd, risposta, sizeof(risposta))) return -1;
     if (strncmp(risposta, "ERRORE", 6) == 0) return -1;
 
-    /* Parsa "token|id|ruolo" (ordine del server) */
+    /* Parsa "id|ruolo|token" */
     tok = strtok(risposta, "|");
-    if (!tok) return -1;
-    strncpy(token_out, tok, token_size - 1);
-    token_out[strcspn(token_out, "\r\n")] = '\0';
-
-    tok = strtok(NULL, "|");
     if (!tok) return -1;
     int id = atoi(tok);
 
@@ -49,6 +44,14 @@ int login_server(const char *username, const char *password,
     if (!tok) return -1;
     strncpy(ruolo_out, tok, ruolo_size - 1);
     ruolo_out[strcspn(ruolo_out, "\r\n")] = '\0';
+
+    tok = strtok(NULL, "|");
+    if (tok) {
+        strncpy(token_out, tok, token_size - 1);
+        token_out[strcspn(token_out, "\r\n")] = '\0';
+    } else {
+        token_out[0] = '\0';
+    }
 
     return id;
 }
@@ -162,4 +165,46 @@ void mostra_lista_utenti(const char *token)
     if (!invia_comando(cmd, risposta, sizeof(risposta)))
         snprintf(risposta, sizeof(risposta), "Errore di connessione.");
     stampa_risposta("LISTA CLIENTI", risposta);
+}
+
+/* ================================================================
+ *  VARIANTI _buf — scrivono la risposta in un buffer invece di
+ *  stamparla con printf. Necessarie per la GUI Raylib, che disegna
+ *  il testo con DrawText() invece di usare stdout.
+ * ================================================================ */
+
+void mostra_storico_buf(const char *token, int id_cliente,
+                        char *buf, int buf_size)
+{
+    char cmd[BUFFER_SIZE];
+    snprintf(cmd, sizeof(cmd), "GET_STORICO|%s|%d", token, id_cliente);
+    if (!invia_comando(cmd, buf, buf_size))
+        strncpy(buf, "Errore di connessione.", buf_size - 1);
+}
+
+void mostra_schede_buf(const char *token, int id_cliente,
+                       char *buf, int buf_size)
+{
+    char cmd[BUFFER_SIZE];
+    snprintf(cmd, sizeof(cmd), "GET_SCHEDE|%s|%d", token, id_cliente);
+    if (!invia_comando(cmd, buf, buf_size))
+        strncpy(buf, "Errore di connessione.", buf_size - 1);
+}
+
+void mostra_piani_buf(const char *token, int id_cliente,
+                      char *buf, int buf_size)
+{
+    char cmd[BUFFER_SIZE];
+    snprintf(cmd, sizeof(cmd), "GET_PIANI_ALIMENTARI|%s|%d", token, id_cliente);
+    if (!invia_comando(cmd, buf, buf_size))
+        strncpy(buf, "Errore di connessione.", buf_size - 1);
+}
+
+void mostra_lista_utenti_buf(const char *token,
+                             char *buf, int buf_size)
+{
+    char cmd[BUFFER_SIZE];
+    snprintf(cmd, sizeof(cmd), "GET_UTENTI|%s", token);
+    if (!invia_comando(cmd, buf, buf_size))
+        strncpy(buf, "Errore di connessione.", buf_size - 1);
 }
