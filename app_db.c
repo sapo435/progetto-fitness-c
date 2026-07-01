@@ -4,7 +4,6 @@
 #include <time.h>
 #include "app_db.h"
 
-
 sqlite3 *g_db = NULL;
 
 static void esegui(const char *sql)

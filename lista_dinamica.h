@@ -22,7 +22,7 @@ void libera_storico_dinamico(NodoPeso *testa);
 
 void carica_storico_dinamico_in_buffer(int id_cliente, char *buf, int buf_size);
 
-/* ARRAY DINAMICO - lista clienti (cresce con realloc) */
+/* ARRAY DINAMICO -lista clienti (cresce con realloc) */
 typedef struct {
     char  nome[DIM_NOME];
     char  cognome[DIM_NOME];
