@@ -1,6 +1,7 @@
 #ifndef APP_DB_H
 #define APP_DB_H
 
+
 #include "sqlite3.h"
 #include "client_modello.h"
 

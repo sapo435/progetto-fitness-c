@@ -3,6 +3,7 @@
  * Lista collegata e array dinamico per la GUI.
  */
 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
