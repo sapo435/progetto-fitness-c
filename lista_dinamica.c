@@ -1,6 +1,8 @@
-/*
- * lista_dinamica.c
- * Lista collegata e array dinamico per la GUI.
+/**
+ * @file lista_dinamica.c
+ * @brief Implementazione di una lista collegata (storico pesi) e di
+ *        un array dinamico ridimensionato con realloc (lista clienti),
+ *        entrambi caricati direttamente da SQLite.
  */
 
 #include <stdio.h>

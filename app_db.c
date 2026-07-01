@@ -4,6 +4,13 @@
 #include <time.h>
 #include "app_db.h"
 
+/**
+ * @file app_db.c
+ * @brief Implementazione dello strato di accesso a SQLite: apertura
+ *        del database, definizione dello schema, e tutte le query
+ *        di lettura/scrittura usate dall'applicazione.
+ */
+
 sqlite3 *g_db = NULL;
 
 static void esegui(const char *sql)
@@ -13,6 +20,24 @@ static void esegui(const char *sql)
         fprintf(stderr, "SQL error: %s\n", err);
         sqlite3_free(err);
     }
+}
+
+/* Verifica se una colonna esiste gia' in una tabella, cosi' da poter
+   eseguire ALTER TABLE ADD COLUMN solo quando serve davvero (evita
+   l'errore innocuo "duplicate column name" a ogni riavvio). */
+static int colonna_esiste(const char *tabella, const char *colonna)
+{
+    char sql[128];
+    snprintf(sql, sizeof(sql), "PRAGMA table_info(%s);", tabella);
+    sqlite3_stmt *s;
+    int trovata = 0;
+    if (sqlite3_prepare_v2(g_db, sql, -1, &s, NULL) != SQLITE_OK) return 0;
+    while (sqlite3_step(s) == SQLITE_ROW) {
+        const char *nome = (const char *)sqlite3_column_text(s, 1);
+        if (nome && strcmp(nome, colonna) == 0) { trovata = 1; break; }
+    }
+    sqlite3_finalize(s);
+    return trovata;
 }
 
 int app_db_init(const char *path)
@@ -59,10 +84,12 @@ int app_db_init(const char *path)
         "INSERT OR IGNORE INTO CREDENZIALI (ID_UTENTE,USERNAME,PASSWORD)"
         " VALUES (1,'trainer','trainer123');"
     );
-    esegui("ALTER TABLE UTENTI ADD COLUMN SERVIZIO INTEGER DEFAULT 2;");
+    if (!colonna_esiste("UTENTI", "SERVIZIO"))
+        esegui("ALTER TABLE UTENTI ADD COLUMN SERVIZIO INTEGER DEFAULT 2;");
     /* Peso obiettivo usato da determina_obiettivo() per calcolare
        se l'utente deve dimagrire, aumentare massa o mantenersi. */
-    esegui("ALTER TABLE UTENTI ADD COLUMN PESO_OBIETTIVO REAL DEFAULT 0;");
+    if (!colonna_esiste("UTENTI", "PESO_OBIETTIVO"))
+        esegui("ALTER TABLE UTENTI ADD COLUMN PESO_OBIETTIVO REAL DEFAULT 0;");
     return 1;
 }
 
