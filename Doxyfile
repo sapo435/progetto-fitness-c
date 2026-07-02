@@ -1,0 +1,50 @@
+## Doxyfile per il progetto "New Fitness"
+## Genera la documentazione con: doxygen Doxyfile
+## L'output HTML sara' in ./docs/html/index.html
+
+PROJECT_NAME           = "New Fitness"
+PROJECT_BRIEF          = "Palestra digitale - Caso di studio C"
+OUTPUT_LANGUAGE        = Italian
+OUTPUT_DIRECTORY       = docs
+
+# Sorgenti da includere (la cartella del progetto).
+# Non serve elencare i singoli file: Doxygen scansiona tutto.
+INPUT                  = .
+FILE_PATTERNS          = *.c *.h
+RECURSIVE              = NO
+
+# Esclude librerie di terze parti dalla documentazione:
+# raylib, sqlite3 non sono codice nostro.
+EXCLUDE                = raylib-src sqlite3.c sqlite3.h
+EXCLUDE_PATTERNS       = */raylib-src/*
+
+# Documenta anche le funzioni senza commento Doxygen esplicito
+# (utile per le funzioni static interne ai file .c)
+EXTRACT_ALL             = YES
+EXTRACT_STATIC          = YES
+EXTRACT_PRIVATE         = YES
+
+# Solo HTML, niente LaTeX/PDF (piu' semplice da consegnare)
+GENERATE_HTML           = YES
+GENERATE_LATEX          = NO
+
+# Diagrammi di dipendenza tra file (richiede Graphviz installato;
+# se non e' installato, Doxygen li salta senza errori bloccanti)
+HAVE_DOT                = YES
+CALL_GRAPH               = YES
+CALLER_GRAPH             = YES
+
+# Aspetto
+GENERATE_TREEVIEW       = YES
+HTML_DYNAMIC_SECTIONS   = YES
+
+# Ordina membri per nome invece che per ordine di dichiarazione
+SORT_MEMBER_DOCS        = YES
+SORT_BRIEF_DOCS         = YES
+
+# Mostra la struttura dei file nel pannello laterale
+SHOW_FILES              = YES
+SHOW_INCLUDE_FILES      = YES
+
+QUIET                    = YES
+WARN_IF_UNDOCUMENTED     = NO
