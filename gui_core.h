@@ -20,11 +20,9 @@
 #include "client_logica.h"
 #include "app_db.h"
 
-/* ================================================================
- *  LAYOUT DINAMICO
- *  Tutte le dimensioni sono espresse tramite la macro SC(), che le
- *  scala in base alla risoluzione corrente della finestra.
- * ================================================================ */
+/*  LAYOUT DINAMICO
+    Tutte le dimensioni sono espresse tramite la macro SC(), che le
+    scala in base alla risoluzione corrente della finestra. */
 #define FINESTRA_W      GetScreenWidth()
 #define FINESTRA_H      GetScreenHeight()
 #define SCALA           ((float)GetScreenWidth() / 1100.0f)
@@ -43,9 +41,7 @@
 #define FONT_NORMALE    SC(15)
 #define FONT_PICCOLO    SC(12)
 
-/* ================================================================
- *  PALETTE
- * ================================================================ */
+/*  PALETTE */
 #define COL_BG          (Color){13,  13,  13,  255}
 #define COL_SURFACE     (Color){26,  26,  26,  255}
 #define COL_CARD        (Color){34,  34,  34,  255}
@@ -141,8 +137,9 @@ extern int   campo_attivo_idx;
 extern int   reg_sesso;
 extern int   reg_attivita;
 extern int   reg_servizio;
+extern int   reg_ruolo;
 
-/*   DICHIARAZIONI gui_widgets.c */
+/* DICHIARAZIONI gui_widgets.c */
 
 /** @brief Azzera tutti i campi input e disattiva quello attivo. */
 void azzera_campi(void);
@@ -214,7 +211,7 @@ void schermata_testo(AppState *s, const char *titolo, const char *sub);
  */
 void schermata_testo_inline(AppState *s, int y0);
 
-/*   DICHIARAZIONI schermate (gui_schermate_auth/cliente/trainer.c)   */
+/* DICHIARAZIONI schermate (gui_schermate_auth/cliente/trainer.c)  */
 
 /** @brief Schermata iniziale con i bottoni "Accedi" e "Crea un account". */
 void schermata_benvenuto(AppState *s);

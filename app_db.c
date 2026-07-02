@@ -116,7 +116,8 @@ int app_login(const char *username, const char *password,
     sqlite3_finalize(s); return id;
 }
 
-int app_registra(const Utente *u, const char *username, const char *password)
+int app_registra(const Utente *u, const char *username, const char *password,
+                  const char *ruolo)
 {
     const char *sql1=
         "INSERT INTO UTENTI"
@@ -126,7 +127,7 @@ int app_registra(const Utente *u, const char *username, const char *password)
     if (sqlite3_prepare_v2(g_db,sql1,-1,&s,NULL)!=SQLITE_OK) return -1;
     sqlite3_bind_text  (s,1,u->nome,-1,SQLITE_TRANSIENT);
     sqlite3_bind_text  (s,2,u->cognome,-1,SQLITE_TRANSIENT);
-    sqlite3_bind_text  (s,3,"cliente",-1,SQLITE_TRANSIENT);
+    sqlite3_bind_text  (s,3,ruolo,-1,SQLITE_TRANSIENT);
     sqlite3_bind_int   (s,4,u->eta);
     char sesso[2]={u->sesso,'\0'};
     sqlite3_bind_text  (s,5,sesso,-1,SQLITE_TRANSIENT);

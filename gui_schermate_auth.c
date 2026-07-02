@@ -8,6 +8,7 @@
 int reg_sesso    = 0;
 int reg_attivita = 1;
 int reg_servizio = 2;
+int reg_ruolo    = 0;   /* 0 = cliente, 1 = trainer */
 
 /* BENVENUTO */
 void schermata_benvenuto(AppState *s)
@@ -173,6 +174,16 @@ static void compila_utente(Utente *u)
     calcola_metriche(u);
 }
 
+/* Il trainer non ha dati fisici da registrare: bastano nome e cognome
+   per identificarlo. Gli altri campi di Utente restano a zero, dato
+   che non vengono mai letti per un account con ruolo "trainer". */
+static void compila_trainer(Utente *u)
+{
+    memset(u, 0, sizeof(*u));
+    strncpy(u->nome, campi[0].testo, DIM_NOME - 1);
+    strncpy(u->cognome, campi[1].testo, DIM_NOME - 1);
+}
+
 void schermata_registra(AppState *s)
 {
     static int step = 0;
@@ -191,7 +202,18 @@ void schermata_registra(AppState *s)
         disegna_header("Nuovo account", "Step 1/2 - Credenziali");
 
         int cx = SIDEBAR_W + (FINESTRA_W - SIDEBAR_W) / 2;
-        int y0 = TITOLO_H + SC(70);
+        int y0 = TITOLO_H + SC(50);
+
+        /* Scelta del tipo di account */
+        DrawText("Tipo di account", cx - INPUT_W / 2, y0 - SC(20), SC(13), COL_TEXT_DIM);
+        const char *ruoli[] = {"Cliente", "Trainer"};
+        for (int i = 0; i < 2; i++) {
+            Color sf = (reg_ruolo == i) ? COL_ACCENT_DIM : COL_SURFACE;
+            Color ct = (reg_ruolo == i) ? COL_ACCENT : COL_TEXT;
+            if (bottone(cx - INPUT_W / 2 + i * SC(190), y0, SC(180), SC(38), ruoli[i], sf, ct))
+                reg_ruolo = i;
+        }
+        y0 += SC(56);
 
         disegna_campo(cx - INPUT_W / 2, y0, INPUT_W, INPUT_H, 0);
         disegna_campo(cx - INPUT_W / 2, y0 + SC(80), INPUT_W, INPUT_H, 1);
@@ -213,10 +235,13 @@ void schermata_registra(AppState *s)
                 azzera_campi();
                 aggiungi_campo("Nome", 0);
                 aggiungi_campo("Cognome", 0);
-                aggiungi_campo("Eta' (anni)", 0);
-                aggiungi_campo("Altezza (cm)", 0);
-                aggiungi_campo("Peso attuale (kg)", 0);
-                aggiungi_campo("Peso obiettivo (kg)", 0);
+                if (reg_ruolo == 0) {
+                    /* Solo il cliente ha bisogno di dati fisici */
+                    aggiungi_campo("Eta' (anni)", 0);
+                    aggiungi_campo("Altezza (cm)", 0);
+                    aggiungi_campo("Peso attuale (kg)", 0);
+                    aggiungi_campo("Peso obiettivo (kg)", 0);
+                }
             }
         }
 
@@ -230,14 +255,58 @@ void schermata_registra(AppState *s)
         return;
     }
 
-    /* Step 2/2 - Dati personali */
+    /*   Step 1/2 - Trainer: solo nome e cognome, nessun dato fisico  */
+    if (reg_ruolo == 1) {
+        disegna_header("Nuovo account trainer", "Step 2/2 - Dati anagrafici");
+
+        int cx = SIDEBAR_W + (FINESTRA_W - SIDEBAR_W) / 2;
+        int y0 = TITOLO_H + SC(70);
+
+        disegna_campo(cx - INPUT_W / 2, y0, INPUT_W, INPUT_H, 0);
+        disegna_campo(cx - INPUT_W / 2, y0 + SC(80), INPUT_W, INPUT_H, 1);
+
+        if (bottone_accent(cx - BTN_W / 2, y0 + SC(168), BTN_W, BTN_H, "REGISTRATI")) {
+            if (strlen(campi[0].testo) < 1 || strlen(campi[1].testo) < 1) {
+                imposta_errore(s, "Nome e cognome obbligatori.");
+            } else {
+                compila_trainer(&s->utente);
+                int id = app_registra(&s->utente, s->utente.username, pwd, "trainer");
+
+                if (id < 0) {
+                    imposta_errore(s, "Errore. Username gia' usato?");
+                } else {
+                    s->id_utente = id;
+                    strncpy(s->username, s->utente.username, DIM_NOME - 1);
+                    strncpy(s->ruolo, "trainer", DIM_NOME - 1);
+
+                    step = 0;
+                    reg_ruolo = 0;
+                    azzera_campi();
+                    imposta_ok(s, "Account trainer creato!");
+                    s->schermata = SCHERMATA_TRAINER;
+                }
+            }
+        }
+
+        if (bottone(cx - BTN_W / 2, y0 + SC(232), BTN_W, SC(36),
+                    "<- Indietro", COL_SURFACE, COL_TEXT_DIM)) {
+            step = 0;
+            azzera_campi();
+            aggiungi_campo("Username", 0);
+            aggiungi_campo("Password", 1);
+            aggiungi_campo("Conferma password", 1);
+        }
+        return;
+    }
+
+    /*   Step 2/2 - Cliente: dati fisici completi + preferenze  */
     disegna_header("Nuovo account", "Step 2/2 - Dati personali");
 
     int col1 = SIDEBAR_W + PADDING;
     int col2 = SIDEBAR_W + (FINESTRA_W - SIDEBAR_W) / 2 + PADDING;
     int y0   = TITOLO_H + SC(60);
 
-    for (int i = 0; i < 6; i++)
+    for (int i = 0; i < num_campi; i++)
         disegna_campo(col1, y0 + i * SC(72), INPUT_W / 2 - SC(8), INPUT_H, i);
 
     int tx = col2;
@@ -250,8 +319,7 @@ void schermata_registra(AppState *s)
         } else {
             compila_utente(&s->utente);
 
-
-            int id = app_registra(&s->utente, s->utente.username, pwd);
+            int id = app_registra(&s->utente, s->utente.username, pwd, "cliente");
 
             if (id < 0) {
                 imposta_errore(s, "Errore. Username gia' usato?");

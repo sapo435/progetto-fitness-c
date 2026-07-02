@@ -8,7 +8,6 @@
  */
 
 /* AREA TRAINER - gestione schede e piani */
-/* AREA TRAINER - gestione schede e piani */
 /* HELPER: formatta programma/piano in testo */
 static void prog_to_buf(const ProgrammaAllenamento *p, char *buf, int sz)
 {

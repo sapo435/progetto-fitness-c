@@ -35,13 +35,15 @@ int  app_login(const char *username, const char *password,
                char *ruolo_out, int ruolo_size);
 
 /**
- * @brief Registra un nuovo cliente nel database (dati anagrafici + credenziali).
+ * @brief Registra un nuovo utente nel database (dati anagrafici + credenziali).
  * @param u Dati anagrafici e metriche del nuovo utente.
  * @param username Username scelto.
  * @param password Password scelta.
+ * @param ruolo "cliente" o "trainer".
  * @return ID del nuovo utente, -1 in caso di errore (es. username duplicato).
  */
-int  app_registra(const Utente *u, const char *username, const char *password);
+int  app_registra(const Utente *u, const char *username, const char *password,
+                   const char *ruolo);
 
 /**
  * @brief Cerca un cliente per nome, cognome o username (ricerca parziale).
