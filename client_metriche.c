@@ -3,9 +3,9 @@
 #include <math.h>
 #include "client_logica.h"
 
-/*
- * client_metriche.c
- * Calcoli fisiologici.
+/**
+ * @file client_metriche.c
+ * @brief Calcoli fisiologici: BMI, BMR, TDEE, kcal obiettivo, macronutrienti.
  */
 
 /* METRICHE FISIOLOGICHE */

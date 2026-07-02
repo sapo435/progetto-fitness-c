@@ -3,9 +3,10 @@
 #include <math.h>
 #include "client_logica.h"
 
-/*
- * client_storico.c
- * Gestione storico pesi.
+/**
+ * @file client_storico.c
+ * @brief Gestione dello storico pesi: registrazione e calcolo
+ *        della variazione media settimanale.
  */
 
 /* STORICO PESI */

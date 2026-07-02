@@ -3,11 +3,11 @@
 #include <math.h>
 #include "client_logica.h"
 
-/*
- * client_programmi.c
- * Costruzione dei programmi di allenamento: funzioni helper
- * (aggiungi_esercizio, aggiungi_sessione) e le funzioni che
- * generano il programma standard e le 3 varianti per obiettivo.
+/**
+ * @file client_programmi.c
+ * @brief Costruzione dei programmi di allenamento: funzioni helper
+ *        (aggiungi_esercizio, aggiungi_sessione) e le funzioni che
+ *        generano il programma standard e le 3 varianti per obiettivo.
  */
 
 /* PROGRAMMA DI ALLENAMENTO */
@@ -260,7 +260,7 @@ ProgrammaAllenamento costruisci_programma_ex(const Utente *u, int variante)
             return costruisci_programma(u);
         }
 
-/* MANTENIMENTO / BENESSERE */
+/* MANTENIMENTO */
     } else {
 
         if (variante == 1) {

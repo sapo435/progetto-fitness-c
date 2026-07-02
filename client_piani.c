@@ -3,9 +3,11 @@
 #include <math.h>
 #include "client_logica.h"
 
-/*
- * client_piani.c
- * Piani nutrizionali.
+/**
+ * @file client_piani.c
+ * @brief Costruzione dei piani nutrizionali: funzione helper
+ *        (aggiungi_pasto) e le funzioni che generano il piano standard
+ *        e le 3 varianti per obiettivo.
  */
 
 /* PIANO NUTRIZIONALE */
