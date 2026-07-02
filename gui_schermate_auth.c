@@ -176,10 +176,18 @@ static void compila_utente(Utente *u)
 
 /* Il trainer non ha dati fisici da registrare: bastano nome e cognome
    per identificarlo. Gli altri campi di Utente restano a zero, dato
-   che non vengono mai letti per un account con ruolo "trainer". */
+   che non vengono mai letti per un account con ruolo "trainer".
+   L'username, gia' impostato allo step 1, va preservato: il memset
+   lo azzererebbe altrimenti, lasciando le credenziali senza username. */
 static void compila_trainer(Utente *u)
 {
+    char username_tmp[DIM_NOME];
+    strncpy(username_tmp, u->username, DIM_NOME - 1);
+    username_tmp[DIM_NOME - 1] = '\0';
+
     memset(u, 0, sizeof(*u));
+
+    strncpy(u->username, username_tmp, DIM_NOME - 1);
     strncpy(u->nome, campi[0].testo, DIM_NOME - 1);
     strncpy(u->cognome, campi[1].testo, DIM_NOME - 1);
 }
@@ -255,7 +263,9 @@ void schermata_registra(AppState *s)
         return;
     }
 
-    /*   Step 1/2 - Trainer: solo nome e cognome, nessun dato fisico  */
+    /* ================================================================
+     *  Step 2/2 - Trainer: solo nome e cognome, nessun dato fisico
+     * ================================================================ */
     if (reg_ruolo == 1) {
         disegna_header("Nuovo account trainer", "Step 2/2 - Dati anagrafici");
 
@@ -299,7 +309,9 @@ void schermata_registra(AppState *s)
         return;
     }
 
-    /*   Step 2/2 - Cliente: dati fisici completi + preferenze  */
+    /* ================================================================
+     *  Step 2/2 - Cliente: dati fisici completi + preferenze
+     * ================================================================ */
     disegna_header("Nuovo account", "Step 2/2 - Dati personali");
 
     int col1 = SIDEBAR_W + PADDING;
